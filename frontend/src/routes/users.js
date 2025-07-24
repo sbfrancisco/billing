@@ -1,17 +1,14 @@
 import React, { useEffect, useState } from 'react';
-
-function App() {
+export default function Users() {
   const [users, setUsers] = useState([]);
-
   useEffect(() => {
     fetch('http://localhost:4567/api/users')
       .then(res => res.json())
       .then(setUsers);
   }, []);
-
   return (
     <div>
-      <h1>Usuarios</h1>
+      <h2>Usuarios</h2>
       <ul>
         {users.map(user => (
           <li key={user.id}>{user.name}</li>
@@ -20,5 +17,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
