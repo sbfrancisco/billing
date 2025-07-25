@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .print\:max-w-none {
+    max-width: none !important;
+  }
+
+  .print\:mx-0 {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  @page {
+    margin: 0.5in;
+    size: A4;
+  }
+}
