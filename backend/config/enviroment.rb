@@ -7,7 +7,7 @@ module AppConfig
   def self.registered(app)
     app.enable :sessions
     app.set :database, adapter: 'sqlite3', database: 'db/wallet_development.sqlite3'
-    app.set :frontend, true # if we take care of the frontend also with ruby -> true
+    app.set :frontend, false # if we take care of the frontend also with ruby -> true
     app.use Rack::MethodOverride
 
     if app.settings.frontend

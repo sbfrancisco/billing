@@ -9,6 +9,7 @@ interface Cliente {
   nombre: string
   telefono: string
   direccion: string
+  documento: string
 }
 
 type ClienteView = "buttons" | "alta" | "buscar"
@@ -20,6 +21,7 @@ export function GeneratePage() {
     nombre: "",
     telefono: "",
     direccion: "",
+    documento: "",
   })
   const [invoiceData, setInvoiceData] = useState({
     emisorNombre: "Daniel Natale",
@@ -28,6 +30,7 @@ export function GeneratePage() {
     clienteNombre: "",
     clienteTelefono: "",
     clienteDireccion: "",
+    clienteDocumento: "",
     fechaEmision: new Date().toLocaleDateString("es-AR"),
     periodoDesde: new Date().toLocaleDateString("es-AR"),
     periodoHasta: new Date().toLocaleDateString("es-AR"),
@@ -66,12 +69,14 @@ export function GeneratePage() {
         nombre: "Carlos Pérez",
         telefono: "111-222-3333",
         direccion: "Calle Falsa 123",
+        documento: "12345678",
       },
       {
         id: "2",
         nombre: "Lucía Gómez",
         telefono: "444-555-6666",
         direccion: "Av. Siempreviva 742",
+        documento: "87654321",
       },
     ])
   }, [])
@@ -84,6 +89,7 @@ export function GeneratePage() {
         clienteNombre: cliente.nombre,
         clienteTelefono: cliente.telefono,
         clienteDireccion: cliente.direccion,
+        clienteDocumento: cliente.documento,
       }))
       setClienteView("buttons")
     }
@@ -106,10 +112,11 @@ export function GeneratePage() {
       clienteNombre: nuevoClienteData.nombre,
       clienteTelefono: nuevoClienteData.telefono,
       clienteDireccion: nuevoClienteData.direccion,
+      clienteDocumento: nuevoClienteData.documento,
     }))
 
     // Limpiar formulario y volver a botones
-    setNuevoClienteData({ nombre: "", telefono: "", direccion: "" })
+    setNuevoClienteData({ nombre: "", telefono: "", direccion: "", documento: "" })
     setClienteView("buttons")
   }
 
@@ -203,6 +210,9 @@ export function GeneratePage() {
                   <p>
                     <strong>Dirección:</strong> {invoiceData.clienteDireccion}
                   </p>
+                  <p>
+                    <strong>Documento:</strong> {invoiceData.clienteDocumento}
+                  </p>
                 </div>
               </div>
             )}
@@ -262,19 +272,32 @@ export function GeneratePage() {
                   placeholder="Ingrese el teléfono"
                 />
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-                <input
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  type="text"
-                  value={nuevoClienteData.direccion}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setNuevoClienteData((prev) => ({ ...prev, direccion: e.target.value }))
-                  }
-                  placeholder="Ingrese la dirección completa"
-                />
-              </div>
+              <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Documento</label>
+    <input
+      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+      type="text"
+      value={nuevoClienteData.documento}
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+        setNuevoClienteData((prev) => ({ ...prev, documento: e.target.value }))
+      }
+      placeholder="Ingrese el documento de identidad"
+    />
+  </div>
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+    <input
+      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+      type="text"
+      value={nuevoClienteData.direccion}
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+        setNuevoClienteData((prev) => ({ ...prev, direccion: e.target.value }))
+      }
+      placeholder="Ingrese la dirección completa"
+    />
+  </div>
             </div>
+            
             <div className="flex gap-3 pt-4">
               <button
                 className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
@@ -315,7 +338,7 @@ export function GeneratePage() {
                 }}
                 defaultValue=""
               >
-                <option value="">-- Seleccionar cliente --</option>
+                <option value="">Seleccionar cliente</option>
                 {clientes.map((cliente) => (
                   <option key={cliente.id} value={cliente.id}>
                     {cliente.nombre} - {cliente.telefono}
