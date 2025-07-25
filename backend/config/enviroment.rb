@@ -1,6 +1,8 @@
 require_relative '../helpers/app_helpers'
 
 require_relative '../models/user'
+require_relative '../models/client'
+require_relative '../models/service'
 # add models here
 
 module AppConfig
