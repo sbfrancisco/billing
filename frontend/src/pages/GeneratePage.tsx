@@ -358,7 +358,7 @@ export function GeneratePage() {
                 <option value="">Seleccionar cliente</option>
                 {clientes.map((cliente) => (
                   <option key={cliente.id} value={cliente.id}>
-                    {cliente.nombre} - {cliente.telefono}
+                    {cliente.nombre} - {cliente.documento}
                   </option>
                 ))}
               </select>
