@@ -48,7 +48,7 @@ end
     json message: "Cliente guardado correctamente", client: client
   else
     status 500
-    json message: "Error al guardar el cliente"
+    json message: "Error al guardar, ya hay un cliente registrado con ese documento"
     end
   end
 

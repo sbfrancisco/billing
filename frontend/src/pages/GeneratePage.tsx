@@ -92,37 +92,38 @@ export function GeneratePage() {
   }
 }
 
-  const handleGuardarNuevoCliente = () => {
-    if (!nuevoClienteData.nombre.trim()) {
-      alert("El nombre del cliente es obligatorio")
-      return
-    }
+const handleGuardarNuevoCliente = () => {
+  if (!nuevoClienteData.nombre.trim()) {
+    alert("El nombre del cliente es obligatorio")
+    return
+  }
 
-    const nuevoCliente: Cliente = {
-      id: Date.now().toString(),
-      ...nuevoClienteData,
-    }
-    
-    fetch("http://localhost:4567/save_client", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    nombre: nuevoClienteData.nombre,
-    direccion: nuevoClienteData.direccion,
-    telefono: nuevoClienteData.telefono,
-    documento: nuevoClienteData.documento,  
-  }),
-})
-  .then((res) => res.json())
-  .then((data) => {
-    console.log("Respuesta del backend:", data)
-  })
-  .catch((err) => {
-    console.error("Error al guardar el servicio:", err)
-  })
+  const nuevoCliente: Cliente = {
+    id: Date.now().toString(),
+    ...nuevoClienteData,
+  }
   
+  fetch("http://localhost:4567/save_client", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      nombre: nuevoClienteData.nombre,
+      direccion: nuevoClienteData.direccion,
+      telefono: nuevoClienteData.telefono,
+      documento: nuevoClienteData.documento,  
+    }),
+  })
+  .then(async (res) => {
+    const data = await res.json()
+    if (!res.ok) {
+      // Si el status no es 2xx, lanza error para evitar actualizar estados
+      throw new Error(data.message || "Error al guardar el cliente")
+    }
+    console.log("Respuesta del backend:", data)
+
+    // Solo si todo está OK, actualizo estados
     setClientes((prev) => [...prev, nuevoCliente])
     setInvoiceData((prev) => ({
       ...prev,
@@ -132,10 +133,16 @@ export function GeneratePage() {
       clienteDocumento: nuevoClienteData.documento,
     }))
 
-    // Limpiar formulario y volver a botones
+    // Limpiar formulario y volver a vista de botones (si querés)
     setNuevoClienteData({ nombre: "", telefono: "", direccion: "", documento: "" })
     setClienteView("buttons")
-  }
+  })
+  .catch((err) => {
+    console.error("Error al guardar el cliente:", err.message)
+    alert(`${err.message}`)
+  })
+}
+
 
   const addItem = (tipo: "producto" | "servicio" = "producto") => {
     const newItem = {
