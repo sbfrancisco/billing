@@ -5,7 +5,9 @@ require 'sinatra/reloader' if Sinatra::Base.environment == :development
 require 'sinatra/activerecord'
 require 'logger'
 require 'net/http'
-require 'json'
+require 'sinatra'
+require 'sinatra/json'
+require 'sinatra/namespace'
 require 'prawn'
 require_relative 'config/enviroment'
 # add here path of custom routes

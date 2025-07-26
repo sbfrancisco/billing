@@ -63,37 +63,34 @@ export function GeneratePage() {
   const [invoiceGenerated, setInvoiceGenerated] = useState(false)
 
   useEffect(() => {
-    setClientes([
-      {
-        id: "1",
-        nombre: "Carlos Pérez",
-        telefono: "111-222-3333",
-        direccion: "Calle Falsa 123",
-        documento: "12345678",
-      },
-      {
-        id: "2",
-        nombre: "Lucía Gómez",
-        telefono: "444-555-6666",
-        direccion: "Av. Siempreviva 742",
-        documento: "87654321",
-      },
-    ])
-  }, [])
+  fetch("http://localhost:4567/clients")
+    .then((res) => res.json())
+    .then((data) => {
+      setClientes(data) // si data ya tiene { id, nombre, telefono, ... }
+    })
+    .catch((err) => {
+      console.error("Error al cargar clientes:", err)
+      alert("No se pudieron cargar los clientes.")
+    })
+}, [])
+
 
   const handleSeleccionCliente = (id: string) => {
-    const cliente = clientes.find((c) => c.id === id)
-    if (cliente) {
-      setInvoiceData((prev) => ({
-        ...prev,
-        clienteNombre: cliente.nombre,
-        clienteTelefono: cliente.telefono,
-        clienteDireccion: cliente.direccion,
-        clienteDocumento: cliente.documento,
-      }))
-      setClienteView("buttons")
-    }
+  // convertimos id a número para comparar si es necesario
+  const idNum = Number(id)
+
+  const cliente = clientes.find(c => Number(c.id) === idNum)
+  if (cliente) {
+    setInvoiceData({
+      ...invoiceData,
+      clienteNombre: cliente.nombre,
+      clienteTelefono: cliente.telefono,
+      clienteDireccion: cliente.direccion,
+      clienteDocumento: cliente.documento,
+    })
+    setClienteView("buttons")
   }
+}
 
   const handleGuardarNuevoCliente = () => {
     if (!nuevoClienteData.nombre.trim()) {
@@ -105,7 +102,27 @@ export function GeneratePage() {
       id: Date.now().toString(),
       ...nuevoClienteData,
     }
-
+    
+    fetch("http://localhost:4567/save_client", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    nombre: nuevoClienteData.nombre,
+    direccion: nuevoClienteData.direccion,
+    telefono: nuevoClienteData.telefono,
+    documento: nuevoClienteData.documento,  
+  }),
+})
+  .then((res) => res.json())
+  .then((data) => {
+    console.log("Respuesta del backend:", data)
+  })
+  .catch((err) => {
+    console.error("Error al guardar el servicio:", err)
+  })
+  
     setClientes((prev) => [...prev, nuevoCliente])
     setInvoiceData((prev) => ({
       ...prev,
