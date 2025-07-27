@@ -4,9 +4,10 @@ import type React from "react"
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { FileText, Eye, EyeOff, ArrowLeft } from "lucide-react"
+import { saveUserToLocalStorage } from "../utils/userStorage"
 
 export function LoginPage() {
-  const [email, setEmail] = useState("")
+   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -16,20 +17,35 @@ export function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulamos una llamada a la API
     setTimeout(() => {
-      // Aquí iría tu lógica de autenticación
-      console.log("Login attempt:", { email, password })
-
-      // Simulamos login exitoso
-      localStorage.setItem("isAuthenticated", "true")
-      localStorage.setItem("user", JSON.stringify({ email, name: "Usuario Demo" }))
-
-      setIsLoading(false)
-      navigate("/dashboard")
-    }, 1500)
+      fetch("http://localhost:4567/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Error en la autenticación")
+          }
+          return response.json()
+        })
+        .then((data) => {
+          console.log("Registro exitoso:", data)
+                    saveUserToLocalStorage({name: data.client.nombre, email: data.client.email, company: data.client.company, direccion: data.client.direccion,
+                                            documento: data.client.documento, telefono: data.client.telefono,
+                                           })
+          navigate("/dashboard")
+        })
+        .catch((err) => {
+          console.error("Error de login:", err)
+        })
+        .finally(() => {
+          setIsLoading(false)
+        })
+    }, 1000)
   }
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       {/* Botón de regreso */}

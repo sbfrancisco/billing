@@ -3,6 +3,7 @@ require_relative '../helpers/app_helpers'
 require_relative '../models/client'
 require_relative '../models/service'
 require_relative '../models/bill'
+require_relative '../models/contact'
 # add models here
 
 module AppConfig

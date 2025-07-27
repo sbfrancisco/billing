@@ -10,7 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_25_215119) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_26_225350) do
+  create_table "bills", force: :cascade do |t|
+    t.string "emisor", null: false
+    t.string "receptor", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "clients", force: :cascade do |t|
     t.string "nombre", null: false
     t.string "telefono", null: false
@@ -18,24 +25,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_25_215119) do
     t.string "documento", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "email"
+    t.string "password_digest"
+    t.string "company"
+    t.index ["documento"], name: "index_clients_on_documento", unique: true
+  end
+
+  create_table "contacts", force: :cascade do |t|
+    t.string "emisor", null: false
+    t.string "receptor", null: false
   end
 
   create_table "services", force: :cascade do |t|
     t.string "nombre", null: false
     t.integer "cantidad", null: false
     t.decimal "precio", precision: 10, scale: 2, null: false
+    t.string "owner"
   end
 
-  create_table "users", force: :cascade do |t|
-    t.string "dni", null: false
-    t.string "email", null: false
-    t.string "name", null: false
-    t.string "last_name", null: false
-    t.string "phone", null: false
-    t.string "locality", null: false
-    t.string "cp", null: false
-    t.string "address", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
+  add_foreign_key "contacts", "clients", column: "emisor", primary_key: "documento"
+  add_foreign_key "contacts", "clients", column: "receptor", primary_key: "documento"
 end

@@ -3,12 +3,14 @@
 import type React from "react"
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
-import { FileText, Eye, EyeOff, User, Mail, Lock, Building, ArrowLeft } from "lucide-react"
-
+import { FileText, Eye, EyeOff, User, Mail, Lock, Building, ArrowLeft, MapPin, IdCard, Phone } from "lucide-react"
+import { saveUserToLocalStorage } from "../utils/userStorage"
 export function RegisterPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    direccion: "",
+    documento: "",
     password: "",
     confirmPassword: "",
     company: "",
@@ -72,24 +74,42 @@ export function RegisterPage() {
     }
 
     setIsLoading(true)
-
-    // Simulamos una llamada a la API
     setTimeout(() => {
-      console.log("Register attempt:", formData)
-
-      // Simulamos registro exitoso
-      localStorage.setItem("isAuthenticated", "true")
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          email: formData.email,
+      fetch("http://localhost:4567/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           name: formData.name,
+          email: formData.email,
+          password: formData.password,
           company: formData.company,
+          direccion: formData.direccion,
+          documento: formData.documento,
+          telefono: formData.phone,
         }),
-      )
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Error al registrar el cliente")
+          }
+          return response.json()
+        })
+        .then((data) => {
+          console.log("Registro exitoso:", data)
+          saveUserToLocalStorage({name: formData.nombre, email: formData.email, password: formData.password, company: formData.company, direccion: formData.direccion,
+                                  documento: formData.documento, telefono: formData.phone,
+                                 })
 
       setIsLoading(false)
       navigate("/dashboard")
+        })
+        .catch((error) => {
+          console.error("Error en el registro:", error)
+          setErrors({ general: "Error al registrar el cliente, verifique los datos" })
+        })
+
     }, 2000)
   }
 
@@ -183,6 +203,57 @@ export function RegisterPage() {
               </div>
             </div>
 
+            <div>
+              <label htmlFor="direccion" className="block text-sm font-medium text-gray-700">
+                Direccion
+              </label>
+              <div className="mt-1 relative">
+                <input
+                  id="direccion"
+                  name="direccion"
+                  type="text"
+                  value={formData.direccion}
+                  onChange={handleChange}
+                  className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 pl-10 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                  placeholder="Ingresa tu dirección de residencia"
+                />
+                <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="documento" className="block text-sm font-medium text-gray-700">
+                Documento
+              </label>
+              <div className="mt-1 relative">
+                <input
+                  id="documento"
+                  name="documento"
+                  type="text"
+                  value={formData.documento}
+                  onChange={handleChange}
+                  className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 pl-10 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                  placeholder="Ingresa tu documento de identidad"
+                />
+                <IdCard className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                Teléfono
+              </label>
+              <div className="mt-1 relative">
+                <input
+                  id="phone"
+                  name="phone"
+                  type="text"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 pl-10 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                  placeholder="Ingresa tu número de teléfono"
+                />
+                <Phone className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              </div>
+            </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Contraseña

@@ -54,8 +54,42 @@ end
 
   get '/clients' do
   content_type :json
-  clientes = Client.all
+  clientes = Client.all.find_by()
   clientes.to_json
   end
 
+  post '/register' do
+  content_type :json
+  data = JSON.parse(request.body.read)
+  client = Client.new(
+    nombre: data['name'],
+    telefono: data['phone'],
+    direccion: data['direccion'],
+    documento: data['documento'],
+    telefono: data['telefono'],
+    company: data['company'],
+    email: data['email'],
+    password: data['password'])
+  if client.save
+    status 201
+    json message: "Cliente registrado correctamente", client: client
+  else
+    status 500
+    json message: "Error al registrar el cliente, verifique los datos" 
+  end
+end
+
+  post '/login' do
+  content_type :json
+  data = JSON.parse(request.body.read)
+  client = Client.find_by(email: data['email'])
+
+  if client && client.authenticate(data['password'])
+    status 200
+    json message: "Login exitoso", client: client
+  else
+    status 401
+    json message: "Credenciales inválidas"
+  end
+end
 end

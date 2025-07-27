@@ -8,6 +8,7 @@ import { GeneratePage } from "./pages/GeneratePage"
 import { AnalyticsPage } from "./pages/AnalyticsPage"
 import { SearchPage } from "./pages/SearchPage"
 import "./App.css"
+import { DataPage } from "./pages/DataPage"
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/generate" element={<GeneratePage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/personal-data" element={<DataPage />} />
             <Route path="/search" element={<SearchPage />} />
           </Routes>
         </main>
