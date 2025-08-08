@@ -75,7 +75,7 @@ export function RegisterPage() {
 
     setIsLoading(true)
     setTimeout(() => {
-      fetch("http://localhost:4567/register", {
+      fetch("http://localhost:8000/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -98,8 +98,8 @@ export function RegisterPage() {
         })
         .then((data) => {
           console.log("Registro exitoso:", data)
-          saveUserToLocalStorage({name: formData.nombre, email: formData.email, password: formData.password, company: formData.company, direccion: formData.direccion,
-                                  documento: formData.documento, telefono: formData.phone,
+          saveUserToLocalStorage({name: formData.name, email: formData.email, password: formData.password, company: formData.company, direccion: formData.direccion,
+                                  documento: formData.documento, telefono: formData.phone, isAuthenticated: true
                                  })
 
       setIsLoading(false)

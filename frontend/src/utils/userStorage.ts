@@ -6,6 +6,7 @@ export function saveUserToLocalStorage(user: {
   direccion?: string
   documento?: string
   telefono?: string
+  isAuthenticated?: boolean
 }) {
   localStorage.setItem("isAuthenticated", "true")
   localStorage.setItem("user", JSON.stringify(user))

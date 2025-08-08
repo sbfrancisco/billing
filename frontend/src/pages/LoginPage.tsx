@@ -7,7 +7,7 @@ import { FileText, Eye, EyeOff, ArrowLeft } from "lucide-react"
 import { saveUserToLocalStorage } from "../utils/userStorage"
 
 export function LoginPage() {
-   const [email, setEmail] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -18,7 +18,7 @@ export function LoginPage() {
     setIsLoading(true)
 
     setTimeout(() => {
-      fetch("http://localhost:4567/login", {
+      fetch("http://localhost:8000/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,7 +34,7 @@ export function LoginPage() {
         .then((data) => {
           console.log("Registro exitoso:", data)
                     saveUserToLocalStorage({name: data.client.nombre, email: data.client.email, company: data.client.company, direccion: data.client.direccion,
-                                            documento: data.client.documento, telefono: data.client.telefono,
+                                            documento: data.client.documento, telefono: data.client.telefono, isAuthenticated: true
                                            })
           navigate("/dashboard")
         })

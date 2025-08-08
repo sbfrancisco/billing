@@ -23,7 +23,7 @@ function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/generate" element={<GeneratePage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
-            <Route path="/personal-data" element={<DataPage />} />
+            <Route path="/personal_data" element={<DataPage />} />
             <Route path="/search" element={<SearchPage />} />
           </Routes>
         </main>

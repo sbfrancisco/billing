@@ -52,9 +52,35 @@ end
     end
   end
 
+post '/update_user' do
+  content_type :json
+  data = JSON.parse(request.body.read)
+
+  client = Client.find_by(documento: data['documento']) 
+
+  unless client && data['isAuthenticated']
+    status 400
+    return json message: "Cliente no encontrado o no autorizado"
+  end
+
+  if client.update(
+    nombre: data['name'],
+    telefono: data['telefono'],
+    direccion: data['direccion'],
+    company: data['company']
+  )
+    status 200
+    json message: "Cliente actualizado correctamente", client: client
+  else
+    status 500
+    json message: "Error al actualizar el cliente, verifique los datos" 
+  end
+end
+
+
   get '/clients' do
   content_type :json
-  clientes = Client.all.find_by()
+  clientes = Client.all
   clientes.to_json
   end
 

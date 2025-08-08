@@ -1,0 +1,7 @@
+RACK_ENV=production
+DB_USER=billing_database_user
+DB_PASSWORD=rvuLo3LJFcFDZzwPKKNQEYJKCqLmD3WQ
+DB_HOST=dpg-d23cmnh5pdvs739qslog-a.oregon-postgres.render.com
+DB_NAME=billing_database
+DB_PORT=5432
+DATABASE_URL=postgresql://billing_database_user:rvuLo3LJFcFDZzwPKKNQEYJKCqLmD3WQ@dpg-d23cmnh5pdvs739qslog-a.oregon-postgres.render.com/billing_database
