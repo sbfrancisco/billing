@@ -12,7 +12,9 @@ require 'prawn'
 require_relative 'config/enviroment'
 # add here path of custom routes
 require_relative 'routes/general'
+require_relative 'routes/other_routers'
 class App < Sinatra::Application
   register AppConfig
   use GeneralRoutes
+  use OtherRoutes
 end

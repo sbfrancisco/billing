@@ -10,12 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_26_225350) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_14_223700) do
   create_table "bills", force: :cascade do |t|
     t.string "emisor", null: false
     t.string "receptor", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "total", precision: 10, scale: 2, default: "0.0", null: false
+    t.string "status", default: "pending"
   end
 
   create_table "clients", force: :cascade do |t|
@@ -43,6 +45,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_26_225350) do
     t.string "owner"
   end
 
+  add_foreign_key "bills", "clients", column: "id"
   add_foreign_key "contacts", "clients", column: "emisor", primary_key: "documento"
   add_foreign_key "contacts", "clients", column: "receptor", primary_key: "documento"
+  add_foreign_key "services", "bills", column: "id"
 end
