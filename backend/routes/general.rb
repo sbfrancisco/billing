@@ -83,11 +83,13 @@ post '/update_user' do
 end
 
 
-  get '/clients' do
+get '/clients' do
   content_type :json
-  clientes = Client.all
-  clientes.to_json
-  end
+  contactos = Contact.where(emisor: params['id'])
+  clientes = contactos.map { |c| Client.find_by(documento: c.receptor) }
+  json clientes
+end
+
 
   post '/register' do
   content_type :json

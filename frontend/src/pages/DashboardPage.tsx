@@ -23,26 +23,26 @@ export function DashboardPage() {
   });
 
   const client = getUserFromLocalStorage();
+  const id = client.documento;
 
   useEffect(() => {
     async function loadDashboard() {
-      const response = await fetch("http://localhost:8000/data_transmitter", {
-        method: "POST",
+      const response = await fetch(`http://localhost:8000/data_transmitter?id=${id}`, {
+        method: "GET",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ documento: client.documento }),
       });
 
       const status_transmitter: StatusTransmitter = await response.json();
 
       setDashboardStats({
         totalFacturas: status_transmitter.bills,
-        facturasEsteMes: 23,
+        facturasEsteMes: 0,
         ingresosTotales: status_transmitter.income,
-        ingresosEsteMes: 345000,
+        ingresosEsteMes: 0,
         clientesActivos: status_transmitter.clients,
-        promedioFactura: 15700,
+        promedioFactura: 0,
         facturasPendientes: status_transmitter.pending,
-        facturasVencidas: 3,
+        facturasVencidas: 0,
       });
     }
 
@@ -68,8 +68,6 @@ export function DashboardPage() {
       default: return "bg-gray-100 text-gray-800";
     }
   };
-
-
 
   return (
     <div className="space-y-6">
@@ -134,9 +132,8 @@ export function DashboardPage() {
         </div>
       </div>
 
-     <div className="flex justify-center">
-
-        {/* Acciones rápidas */}
+      {/* Acciones rápidas */}
+      <div className="flex justify-center">
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
@@ -184,7 +181,7 @@ export function DashboardPage() {
             </div>
           </div>
         </div>          
-        </div>
+      </div>
 
       {/* Facturas recientes */}
       <div className="bg-white rounded-lg shadow-sm border">
@@ -238,5 +235,5 @@ export function DashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

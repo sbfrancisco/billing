@@ -14,7 +14,7 @@ interface Cliente {
 }
 
 type ClienteView = "buttons" | "alta" | "buscar"
-const client = getUserFromLocalStorage();
+
 export function GeneratePage() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [clienteView, setClienteView] = useState<ClienteView>("buttons")
@@ -62,9 +62,9 @@ export function GeneratePage() {
   })
   const [showForm, setShowForm] = useState(true)
   const [invoiceGenerated, setInvoiceGenerated] = useState(false)
-
+const client = getUserFromLocalStorage();
   useEffect(() => {
-  fetch("http://localhost:4567/clients")
+  fetch("http://localhost:8000/clients?id=" + client.documento)
     .then((res) => res.json())
     .then((data) => {
       setClientes(data) // si data ya tiene { id, nombre, telefono, ... }
