@@ -119,28 +119,6 @@ export function HomePage() {
           </div>
         </div>
       </div>
-
-      {/* Call to Action Final */}
-      <div className="bg-gray-900 rounded-lg shadow-lg text-white p-8 text-center">
-        <h2 className="text-3xl font-bold mb-4">¿Listo para comenzar?</h2>
-        <p className="text-xl mb-6 text-gray-300">Únete a miles de profesionales que ya confían en nuestro sistema.</p>
-        <div className="flex justify-center gap-4">
-          <Link
-            to="/register"
-            className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center"
-          >
-            <UserPlus className="h-5 w-5 mr-2" />
-            Crear Cuenta Gratis
-          </Link>
-          <Link
-            to="/login"
-            className="border border-gray-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors flex items-center"
-          >
-            <LogIn className="h-5 w-5 mr-2" />
-            Ya tengo cuenta
-          </Link>
-        </div>
       </div>
-    </div>
   )
 }

@@ -159,26 +159,8 @@ export function LoginPage() {
             </div>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-gray-500">Demo</span>
-              </div>
             </div>
-
-            <div className="mt-6 bg-blue-50 border border-blue-200 rounded-md p-4">
-              <div className="text-sm text-blue-800">
-                <p className="font-medium">Credenciales de prueba:</p>
-                <p>Email: demo@ejemplo.com</p>
-                <p>Contraseña: demo123</p>
-              </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
   )
 }

@@ -4,6 +4,7 @@ require_relative '../models/client'
 require_relative '../models/service'
 require_relative '../models/bill'
 require_relative '../models/contact'
+require_relative '../models/sale'
 # add models here
 
 module AppConfig

@@ -1,7 +1,7 @@
 "use client"
 
 import { Link, useLocation } from "react-router-dom"
-import { FileText, Plus, BarChart3, Search, LayoutDashboard, LogOut, User, IdCard } from "lucide-react"
+import { FileText, Plus, BarChart3, Search, LayoutDashboard, LogOut, User, IdCard , Briefcase  } from "lucide-react"
 import { useState, useEffect } from "react"
 
 export function Header() {
@@ -43,7 +43,7 @@ export function Header() {
           {/* Logo */}
           <Link to={user ? "/dashboard" : "/"} className="flex items-center">
             <FileText className="h-8 w-8 text-blue-600 mr-3" />
-            <h1 className="text-xl font-bold text-gray-900">Sistema de Facturas</h1>
+            <h1 className="text-xl font-bold text-gray-900"></h1>
           </Link>
 
           {/* Navegación */}
@@ -86,6 +86,7 @@ export function Header() {
                 Analizar
               </Link>
 
+                  
                 <Link
                 to="/personal_data"
                 className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -109,6 +110,19 @@ export function Header() {
                 <Search className="h-4 w-4 mr-2" />
                 Buscar
               </Link>
+
+              <Link
+                to="/register_service"
+                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive("/register_service")
+                    ? "bg-blue-100 text-blue-700"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <Briefcase className="h-4 w-4 mr-2" />
+                Gestion
+              </Link>
+
             </nav>
           ) : (
             // Usuario NO autenticado - Solo navegación básica

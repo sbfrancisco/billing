@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_14_223700) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_15_033617) do
   create_table "bills", force: :cascade do |t|
     t.string "emisor", null: false
     t.string "receptor", null: false
@@ -38,15 +38,27 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_14_223700) do
     t.string "receptor", null: false
   end
 
+  create_table "sales", force: :cascade do |t|
+    t.integer "service_id", null: false
+    t.integer "bill_id", null: false
+    t.integer "quantity", default: 1, null: false
+    t.decimal "price", precision: 10, scale: 2, default: "0.0", null: false
+    t.index ["bill_id"], name: "index_sales_on_bill_id"
+    t.index ["service_id"], name: "index_sales_on_service_id"
+  end
+
   create_table "services", force: :cascade do |t|
     t.string "nombre", null: false
-    t.integer "cantidad", null: false
-    t.decimal "precio", precision: 10, scale: 2, null: false
-    t.string "owner"
+    t.string "transmitter"
+    t.boolean "persistent", default: false
+    t.boolean "isService", default: true
+    t.decimal "price_base", precision: 10, scale: 2, default: "0.0", null: false
   end
 
   add_foreign_key "bills", "clients", column: "id"
   add_foreign_key "contacts", "clients", column: "emisor", primary_key: "documento"
   add_foreign_key "contacts", "clients", column: "receptor", primary_key: "documento"
+  add_foreign_key "sales", "bills"
+  add_foreign_key "sales", "services"
   add_foreign_key "services", "bills", column: "id"
 end

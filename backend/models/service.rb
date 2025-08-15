@@ -1,3 +1,3 @@
 class Service < ActiveRecord::Base
-  has_one :bill
+  has_many :sales
 end

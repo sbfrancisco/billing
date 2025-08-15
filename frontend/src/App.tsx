@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import "./App.css"
 import { Header } from "./components/Header"
 import { HomePage } from "./pages/HomePage"
 import { LoginPage } from "./pages/LoginPage"
@@ -6,10 +7,9 @@ import { RegisterPage } from "./pages/RegisterPage"
 import { DashboardPage } from "./pages/DashboardPage"
 import { GeneratePage } from "./pages/GeneratePage"
 import { AnalyticsPage } from "./pages/AnalyticsPage"
+import { ProductRegisterPage } from "./pages/ProductRegisterPage"
 import { SearchPage } from "./pages/SearchPage"
-import "./App.css"
 import { DataPage } from "./pages/DataPage"
-
 function App() {
   return (
     <Router>
@@ -25,6 +25,7 @@ function App() {
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/personal_data" element={<DataPage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/register_service" element={<ProductRegisterPage />} />
           </Routes>
         </main>
       </div>
