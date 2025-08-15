@@ -15,10 +15,11 @@ module AppConfig
     app.use Rack::MethodOverride
 
     if app.settings.frontend
-    app.set :views, File.expand_path('../../views', __FILE__)
-    app.set :public_folder, File.expand_path('../../public', __FILE__)
+      app.set :views, File.expand_path('../../views', __FILE__)
+      app.set :public_folder, File.expand_path('../../public', __FILE__)
     end
 
+    # Logger para desarrollo
     ActiveRecord::Base.logger = Logger.new(STDOUT) if app.development?
 
     app.configure :development do
@@ -29,9 +30,26 @@ module AppConfig
 
       app.register Sinatra::Reloader
       app.after_reload do
-      logger.info 'Reloaded!!!'
+        logger.info 'Reloaded!!!'
       end
     end
+
+    # Helpers
     app.helpers AppHelpers
+
+    app.before do
+      response.headers['Access-Control-Allow-Origin'] = '*'
+      response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Accept, Authorization, X-Requested-With'
+      response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    end
+
+    app.options '*' do
+      response.headers['Access-Control-Allow-Origin'] = '*'
+      response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Accept, Authorization, X-Requested-With'
+      response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+      content_type :json
+      status 200
+      body({ message: 'OK' }.to_json)
+    end
   end
 end

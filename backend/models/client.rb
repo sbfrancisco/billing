@@ -8,6 +8,7 @@ class Client < ActiveRecord::Base
   validates :documento, presence: true, uniqueness: true
 
   has_many :bills, foreign_key: :receptor, primary_key: :documento
+  has_many :services, foreign_key: :transmitter, primary_key: :documento
 
   # Contactos donde este cliente es emisor
   has_many :emisor_contacts,

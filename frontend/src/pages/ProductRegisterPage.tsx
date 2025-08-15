@@ -1,56 +1,123 @@
 "use client"
 
-import { useState } from "react"
-import { Package, Plus, Save, Trash2, Search, Edit3 } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Package, Plus, Save, Trash2, Search, Edit3, RefreshCw } from "lucide-react"
+import { getUserFromLocalStorage } from "../utils/userStorage"
+import SimpleAlert from '../components/notification'
 
 interface Service {
   id: string
   nombre: string
   precio: number
   esServicio: boolean
+  transmitter: string
 }
 
+const client = getUserFromLocalStorage()
+
+
 export function ProductRegisterPage() {
+ const [alertBox, setAlertBox] = useState<{
+  visible: boolean
+  message: string
+  success: boolean
+}>({ visible: false, message: "", success: true })
+
+// Función para mostrar el alert
+const showAlertBox = (message: string, success: boolean = true) => {
+  setAlertBox({ visible: true, message, success })
+}
   const [services, setServices] = useState<Service[]>([])
   const [currentView, setCurrentView] = useState<"list" | "add" | "edit">("list")
   const [editingService, setEditingService] = useState<Service | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterType, setFilterType] = useState<"all" | "productos" | "servicios">("all")
+  const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingServices, setIsLoadingServices] = useState(false)
 
   const [newService, setNewService] = useState<Omit<Service, "id">>({
     nombre: "",
     precio: 0,
     esServicio: false,
+    transmitter: client.documento,
   })
+
+  const prepareServiceForBackend = (formData: Omit<Service, "id">) => ({
+    service: {
+      nombre: formData.nombre,
+      transmitter: client.documento,
+      persistent: true,
+      isService: formData.esServicio,
+      price_base: formData.precio,
+    },
+  })
+
+  const loadServices = async () => {
+    setIsLoadingServices(true)
+    try {
+      const response = await fetch(`http://localhost:8000/services?transmitter=${client.documento}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      })
+
+      if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`)
+
+      const data = await response.json()
+      const frontendServices: Service[] = data.services.map((s: any) => ({
+        id: s.id.toString(),
+        nombre: s.nombre,
+        precio: parseFloat(s.price_base),
+        esServicio: s.isService,
+        transmitter: s.transmitter,
+      }))
+
+      setServices(frontendServices)
+    } catch (error) {
+      console.error("Error loading services:", error)
+      alert(`Error al cargar servicios: ${error instanceof Error ? error.message : "Error desconocido"}`)
+    } finally {
+      setIsLoadingServices(false)
+    }
+  }
+
+  useEffect(() => {
+    loadServices()
+  }, [])
 
   const resetForm = () => {
     setNewService({
       nombre: "",
       precio: 0,
       esServicio: false,
+      transmitter: client.documento,
     })
   }
 
-  const handleSaveService = () => {
-    if (!newService.nombre.trim()) {
-      alert("El nombre es obligatorio")
-      return
-    }
+  const handleSaveService = async () => {
+    if (!newService.nombre.trim()) return showAlertBox("El nombre es obligatorio", false)
+    if (newService.precio <= 0) return showAlertBox("El precio debe ser mayor a 0", false)
 
-    if (newService.precio <= 0) {
-      alert("El precio debe ser mayor a 0")
-      return
-    }
+    setIsLoading(true)
+    try {
+      const serviceData = prepareServiceForBackend(newService)
+      const response = await fetch("http://localhost:8000/save_service", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(serviceData),
+      })
 
-    const serviceToSave = {
-      ...newService,
-      id: Date.now().toString(),
-    }
+      if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`)
 
-    setServices((prev) => [...prev, serviceToSave])
-    resetForm()
-    setCurrentView("list")
-    alert("Guardado correctamente")
+      await loadServices()
+      resetForm()
+      setCurrentView("list")
+      showAlertBox("Servicio guardado correctamente", true)
+    } catch (error) {
+      console.error("Error saving service:", error)
+      alert(`Error al guardar: ${error instanceof Error ? error.message : "Error desconocido"}`)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleEditService = (service: Service) => {
@@ -59,40 +126,62 @@ export function ProductRegisterPage() {
     setCurrentView("edit")
   }
 
-  const handleUpdateService = () => {
+  const handleUpdateService = async () => {
     if (!editingService) return
+    if (!newService.nombre.trim()) return alert("El nombre es obligatorio")
+    if (newService.precio <= 0) return alert("El precio debe ser mayor a 0")
 
-    if (!newService.nombre.trim()) {
-      alert("El nombre es obligatorio")
-      return
+    setIsLoading(true)
+    try {
+      const serviceData = prepareServiceForBackend(newService)
+      const response = await fetch(`http://localhost:8000/update_service?id=${editingService.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(serviceData),
+      })
+
+      if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`)
+      await loadServices()
+      showAlertBox("Servicio actualizado correctamente", true)
+      resetForm()
+      setEditingService(null)
+      setCurrentView("list")
+    } catch (error) {
+      console.error("Error updating service:", error)
+      alert(`Error al actualizar: ${error instanceof Error ? error.message : "Error desconocido"}`)
+    } finally {
+      setIsLoading(false)
     }
-
-    if (newService.precio <= 0) {
-      alert("El precio debe ser mayor a 0")
-      return
-    }
-
-    setServices((prev) => prev.map((s) => (s.id === editingService.id ? { ...newService, id: editingService.id } : s)))
-    resetForm()
-    setEditingService(null)
-    setCurrentView("list")
-    alert("Actualizado correctamente")
   }
 
-  const handleDeleteService = (id: string) => {
-    if (confirm("¿Estás seguro de que deseas eliminar este registro?")) {
-      setServices((prev) => prev.filter((s) => s.id !== id))
+  const handleDeleteService = async (id: string) => {
+    if (!confirm("¿Estás seguro de que deseas eliminar este registro?")) return
+
+    setIsLoading(true)
+    try {
+      const response = await fetch(`http://localhost:8000/delete_service?id=${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      })
+
+      if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`)
+
+      await loadServices()
+      showAlertBox("Servicio eliminado correctamente", true)
+    } catch (error) {
+      console.error("Error deleting service:", error)
+      alert(`Error al eliminar: ${error instanceof Error ? error.message : "Error desconocido"}`)
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const filteredServices = services.filter((service) => {
     const matchesSearch = service.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-
     const matchesFilter =
       filterType === "all" ||
       (filterType === "productos" && !service.esServicio) ||
       (filterType === "servicios" && service.esServicio)
-
     return matchesSearch && matchesFilter
   })
 
@@ -119,6 +208,7 @@ export function ProductRegisterPage() {
                 checked={!newService.esServicio}
                 onChange={() => setNewService((prev) => ({ ...prev, esServicio: false }))}
                 className="mr-2 text-blue-600 focus:ring-blue-500"
+                disabled={isLoading}
               />
               <span className="text-sm text-gray-700">Producto</span>
             </label>
@@ -129,6 +219,7 @@ export function ProductRegisterPage() {
                 checked={newService.esServicio}
                 onChange={() => setNewService((prev) => ({ ...prev, esServicio: true }))}
                 className="mr-2 text-blue-600 focus:ring-blue-500"
+                disabled={isLoading}
               />
               <span className="text-sm text-gray-700">Servicio</span>
             </label>
@@ -138,42 +229,46 @@ export function ProductRegisterPage() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
           <input
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
             type="text"
             value={newService.nombre}
             onChange={(e) => setNewService((prev) => ({ ...prev, nombre: e.target.value }))}
             placeholder="Nombre del producto/servicio"
+            disabled={isLoading}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Precio *</label>
           <input
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
             type="number"
             value={newService.precio}
             onChange={(e) => setNewService((prev) => ({ ...prev, precio: Number.parseFloat(e.target.value) || 0 }))}
             min="0"
             step="0.01"
             placeholder="0.00"
+            disabled={isLoading}
           />
         </div>
 
         <div className="flex gap-3 pt-4">
           <button
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 disabled:bg-blue-400 disabled:cursor-not-allowed"
             onClick={currentView === "edit" ? handleUpdateService : handleSaveService}
+            disabled={isLoading}
           >
             <Save className="w-4 h-4" />
-            {currentView === "edit" ? "Actualizar" : "Guardar"}
+            {isLoading ? "Guardando..." : currentView === "edit" ? "Actualizar" : "Guardar"}
           </button>
           <button
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium"
+            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium disabled:bg-gray-100 disabled:cursor-not-allowed"
             onClick={() => {
               resetForm()
               setEditingService(null)
               setCurrentView("list")
             }}
+            disabled={isLoading}
           >
             Cancelar
           </button>
@@ -185,11 +280,23 @@ export function ProductRegisterPage() {
   const renderServiceList = () => (
     <div className="bg-white rounded-lg shadow-sm border">
       <div className="p-6 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-          <Package className="w-5 h-5 text-green-600" />
-          Productos y Servicios Registrados
-        </h3>
-        <p className="text-sm text-gray-600 mt-1">Gestiona tu catálogo de productos y servicios</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <Package className="w-5 h-5 text-green-600" />
+              Productos y Servicios Registrados
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">Gestiona tu catálogo de productos y servicios</p>
+          </div>
+          <button
+            onClick={loadServices}
+            disabled={isLoadingServices}
+            className="p-2 text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors disabled:text-gray-400 disabled:cursor-not-allowed"
+            title="Actualizar servicios"
+          >
+            <RefreshCw className={`w-5 h-5 ${isLoadingServices ? "animate-spin" : ""}`} />
+          </button>
+        </div>
       </div>
 
       <div className="p-6">
@@ -224,7 +331,12 @@ export function ProductRegisterPage() {
           </button>
         </div>
 
-        {filteredServices.length === 0 ? (
+        {isLoadingServices ? (
+          <div className="text-center py-12 text-gray-500">
+            <RefreshCw className="w-8 h-8 mx-auto mb-4 text-gray-300 animate-spin" />
+            <p className="text-lg font-medium">Cargando servicios...</p>
+          </div>
+        ) : filteredServices.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
             <p className="text-lg font-medium mb-2">
@@ -260,14 +372,16 @@ export function ProductRegisterPage() {
                   </div>
                   <div className="flex gap-2">
                     <button
-                      className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                      className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors disabled:text-blue-400 disabled:cursor-not-allowed"
                       onClick={() => handleEditService(service)}
+                      disabled={isLoading}
                     >
                       <Edit3 className="w-4 h-4" />
                     </button>
                     <button
-                      className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                      className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors disabled:text-red-400 disabled:cursor-not-allowed"
                       onClick={() => handleDeleteService(service.id)}
+                      disabled={isLoading}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -295,7 +409,6 @@ export function ProductRegisterPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Registro de Productos y Servicios</h1>
           <p className="text-gray-600 mt-2">Gestiona tu catálogo de manera simple y eficiente</p>
@@ -306,6 +419,12 @@ export function ProductRegisterPage() {
           {(currentView === "add" || currentView === "edit") && renderServiceForm()}
         </div>
       </div>
+      <SimpleAlert
+  show={alertBox.visible}
+  message={alertBox.message}
+  success={alertBox.success}
+  onClose={() => setAlertBox((prev) => ({ ...prev, visible: false }))}
+/>
     </div>
   )
 }

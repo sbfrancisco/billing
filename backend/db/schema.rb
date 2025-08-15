@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_15_033617) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_15_042808) do
   create_table "bills", force: :cascade do |t|
     t.string "emisor", null: false
     t.string "receptor", null: false
@@ -53,6 +53,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_15_033617) do
     t.boolean "persistent", default: false
     t.boolean "isService", default: true
     t.decimal "price_base", precision: 10, scale: 2, default: "0.0", null: false
+    t.index ["transmitter"], name: "index_services_on_transmitter"
   end
 
   add_foreign_key "bills", "clients", column: "id"
@@ -60,5 +61,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_15_033617) do
   add_foreign_key "contacts", "clients", column: "receptor", primary_key: "documento"
   add_foreign_key "sales", "bills"
   add_foreign_key "sales", "services"
-  add_foreign_key "services", "bills", column: "id"
+  add_foreign_key "services", "clients", column: "transmitter", primary_key: "documento"
 end
