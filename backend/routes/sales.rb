@@ -74,4 +74,17 @@ class SalesRoutes < Sinatra::Base
       json message: "Servicio no encontrado"
     end
   end
+
+  get '/last_voucher_number' do
+  content_type :json
+  last_voucher = Bill.last
+  if last_voucher
+    status 200
+    json last_voucher_number: last_voucher.number
+  else
+    status 200
+    json last_voucher_number: 0
+  end
+end
+
 end

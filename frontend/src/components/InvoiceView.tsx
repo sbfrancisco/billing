@@ -233,3 +233,4 @@ export function InvoiceView({ invoiceData, invoiceGenerated, onEdit, onSave }: I
     </div>
   )
 }
+

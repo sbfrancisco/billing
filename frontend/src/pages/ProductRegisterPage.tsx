@@ -286,7 +286,6 @@ const showAlertBox = (message: string, success: boolean = true) => {
               <Package className="w-5 h-5 text-green-600" />
               Productos y Servicios Registrados
             </h3>
-            <p className="text-sm text-gray-600 mt-1">Gestiona tu catálogo de productos y servicios</p>
           </div>
           <button
             onClick={loadServices}
