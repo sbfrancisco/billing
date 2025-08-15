@@ -3,6 +3,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Plus, Trash2, User, Package, FileText, Save, ArrowLeft, UserPlus, Search } from "lucide-react"
 import { InvoiceView } from "../components/InvoiceView"
+import { getUserFromLocalStorage} from "../utils/userStorage"
 
 interface Cliente {
   id: string
@@ -13,7 +14,7 @@ interface Cliente {
 }
 
 type ClienteView = "buttons" | "alta" | "buscar"
-
+const client = getUserFromLocalStorage();
 export function GeneratePage() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [clienteView, setClienteView] = useState<ClienteView>("buttons")
@@ -103,7 +104,7 @@ const handleGuardarNuevoCliente = () => {
     ...nuevoClienteData,
   }
   
-  fetch("http://localhost:4567/save_client", {
+  fetch("http://localhost:8000/save_client", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -112,7 +113,8 @@ const handleGuardarNuevoCliente = () => {
       nombre: nuevoClienteData.nombre,
       direccion: nuevoClienteData.direccion,
       telefono: nuevoClienteData.telefono,
-      documento: nuevoClienteData.documento,  
+      documento: nuevoClienteData.documento,
+      emisor: client.documento
     }),
   })
   .then(async (res) => {

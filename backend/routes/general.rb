@@ -40,10 +40,15 @@ end
     nombre: data['nombre'],
     telefono: data['telefono'],
     direccion: data['direccion'],
-    documento: data['documento']
-  )
+    documento: data['documento'],
+    password_digest: "a",
+    company: "a")
 
   if client.save
+      Contact.create(
+      emisor: data['emisor'],
+      receptor: data['documento']
+    )
     status 201
     json message: "Cliente guardado correctamente", client: client
   else

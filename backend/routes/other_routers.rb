@@ -4,16 +4,21 @@ class OtherRoutes < Sinatra::Base
   register AppConfig
   # send json response with bills, clients, income
 
-  get '/data_transmitter' do
+  post '/data_transmitter' do
     content_type :json
     data = JSON.parse(request.body.read)
-    transmitter = Client.find_by(id: data['client_id'])
-    data = {
-      bills: transmitter.bills.count,
-      clients: transmitter.contacts.count,
-      income: transmitter.bills.where(status: 'success').sum(:total),
-      pending: transmitter.bills.where(status: 'pending').count
-    }
-    json data
+    puts "Datos recibidos:", data
+    transmitter = Client.find_by(documento: data['documento'])
+     response_data = if transmitter
+      {
+        bills: transmitter.bills.count,
+        clients: transmitter.clients.count,
+        income: transmitter.bills.where(status: 'success').sum(:total),
+        pending: transmitter.bills.where(status: 'pending').count
+      }
+    else
+      { bills: 0, clients: 0, income: 0, pending: 0 }
+    end
+    json response_data
   end
 end

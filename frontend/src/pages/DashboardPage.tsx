@@ -1,18 +1,53 @@
-import { Link } from "react-router-dom"
-import { Plus, Search, BarChart3, FileText, DollarSign, Users, Calendar, Clock } from "lucide-react"
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Plus, Search, BarChart3, FileText, DollarSign, Users, Calendar, Clock } from "lucide-react";
+import { getUserFromLocalStorage } from "@/utils/userStorage";
 
 export function DashboardPage() {
-  // Datos de ejemplo para el dashboard
-  const dashboardStats = {
-    totalFacturas: 156,
-    facturasEsteMes: 23,
-    ingresosTotales: 2450000,
-    ingresosEsteMes: 345000,
-    clientesActivos: 45,
-    promedioFactura: 15700,
-    facturasPendientes: 8,
-    facturasVencidas: 3,
+  interface StatusTransmitter {
+    bills: number;
+    clients: number;
+    income: number;
+    pending: number;
   }
+
+  const [dashboardStats, setDashboardStats] = useState({
+    totalFacturas: 0,
+    facturasEsteMes: 0,
+    ingresosTotales: 0,
+    ingresosEsteMes: 0,
+    clientesActivos: 0,
+    promedioFactura: 0,
+    facturasPendientes: 0,
+    facturasVencidas: 0,
+  });
+
+  const client = getUserFromLocalStorage();
+
+  useEffect(() => {
+    async function loadDashboard() {
+      const response = await fetch("http://localhost:8000/data_transmitter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documento: client.documento }),
+      });
+
+      const status_transmitter: StatusTransmitter = await response.json();
+
+      setDashboardStats({
+        totalFacturas: status_transmitter.bills,
+        facturasEsteMes: 23,
+        ingresosTotales: status_transmitter.income,
+        ingresosEsteMes: 345000,
+        clientesActivos: status_transmitter.clients,
+        promedioFactura: 15700,
+        facturasPendientes: status_transmitter.pending,
+        facturasVencidas: 3,
+      });
+    }
+
+    loadDashboard();
+  }, [client.documento]);
 
   const recentInvoices = [
     { id: "001", cliente: "Juan Pérez", fecha: "2024-01-15", total: 25000, estado: "Pagada" },
@@ -20,28 +55,20 @@ export function DashboardPage() {
     { id: "003", cliente: "Carlos López", fecha: "2024-01-13", total: 32000, estado: "Pagada" },
     { id: "004", cliente: "Ana Martínez", fecha: "2024-01-12", total: 12000, estado: "Vencida" },
     { id: "005", cliente: "Luis Rodríguez", fecha: "2024-01-11", total: 28000, estado: "Pagada" },
-  ]
+  ];
 
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("es-AR", {
-      style: "currency",
-      currency: "ARS",
-    }).format(amount)
-  }
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" }).format(amount);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Pagada":
-        return "bg-green-100 text-green-800"
-      case "Pendiente":
-        return "bg-yellow-100 text-yellow-800"
-      case "Vencida":
-        return "bg-red-100 text-red-800"
-      default:
-        return "bg-gray-100 text-gray-800"
+      case "Pagada": return "bg-green-100 text-green-800";
+      case "Pendiente": return "bg-yellow-100 text-yellow-800";
+      case "Vencida": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
     }
-  }
+  };
+
 
 
   return (
