@@ -98,7 +98,6 @@ export async function fetchServices(): Promise<Service[]> {
 
     const data = await response.json();
 
-    // Mapear los datos del backend a tu tipo Service
     const frontendServices: Service[] = data.services.map((s: any) => ({
       id: s.id.toString(),
       descripcion: s.nombre,
@@ -111,5 +110,23 @@ export async function fetchServices(): Promise<Service[]> {
   } catch (error) {
     console.error("Error al cargar servicios:", error);
     throw error;
+  }
+}
+
+export async function fetchBills(): Promise<any[]> {
+  const client = getUserFromLocalStorage()
+  try {
+    const response = await fetch(`http://localhost:8000/fetch_bills?transmitter=${client.documento}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    const data = await response.json()
+    console.log("facturas obtenidas:", data)
+    return data;
+  } catch (error) {
+    console.error("Error al obtener las facturas que emitiste:", error)
+    throw error
   }
 }

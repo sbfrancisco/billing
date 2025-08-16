@@ -1,39 +1,19 @@
-"use client"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Printer } from "lucide-react"
+import { fetchBills, getStatusColor, formatCurrency } from "../utils/billUtils"
+import { getUserFromLocalStorage } from "@/utils/userStorage";
 
 export function SearchPage() {
+  const client = getUserFromLocalStorage(); 
   const [searchTerm, setSearchTerm] = useState("")
   const [dateFilter, setDateFilter] = useState("")
+  const [bills, setBills] = useState<any[]>([]);
 
-  const recentInvoices = [
-    { id: "001", cliente: "Juan Pérez", fecha: "2024-01-15", total: 25000, estado: "Pagada" },
-    { id: "002", cliente: "María García", fecha: "2024-01-14", total: 18500, estado: "Pendiente" },
-    { id: "003", cliente: "Carlos López", fecha: "2024-01-13", total: 32000, estado: "Pagada" },
-    { id: "004", cliente: "Ana Martínez", fecha: "2024-01-12", total: 12000, estado: "Vencida" },
-    { id: "005", cliente: "Luis Rodríguez", fecha: "2024-01-11", total: 28000, estado: "Pagada" },
-  ]
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("es-AR", {
-      style: "currency",
-      currency: "ARS",
-    }).format(amount)
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Pagada":
-        return "bg-green-100 text-green-800"
-      case "Pendiente":
-        return "bg-yellow-100 text-yellow-800"
-      case "Vencida":
-        return "bg-red-100 text-red-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
+   useEffect(() => {
+   if (client?.documento) {
+     fetchBills(client.documento).then(setBills);
+   }
+ }, [client.documento]);
 
   return (
     <div className="space-y-6">
@@ -98,23 +78,23 @@ export function SearchPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {recentInvoices
+              {bills
                 .filter(
-                  (invoice) => searchTerm === "" || invoice.cliente.toLowerCase().includes(searchTerm.toLowerCase()),
+                  (invoice) => searchTerm === "" || invoice.client_name.toLowerCase().includes(searchTerm.toLowerCase()),
                 )
                 .map((invoice) => (
                   <tr key={invoice.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{invoice.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{invoice.cliente}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{invoice.client_name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{invoice.fecha}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {formatCurrency(invoice.total)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(invoice.estado)}`}
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(invoice.status)}`}
                       >
-                        {invoice.estado}
+                        {invoice.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

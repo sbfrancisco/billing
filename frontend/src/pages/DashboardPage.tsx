@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Plus, Search, BarChart3, FileText, DollarSign, Users, Calendar, Clock } from "lucide-react";
 import { getUserFromLocalStorage } from "@/utils/userStorage";
-
+import { fetchBills } from "../utils/billUtils"
 export function DashboardPage() {
   interface StatusTransmitter {
     bills: number;
@@ -11,6 +11,7 @@ export function DashboardPage() {
     pending: number;
   }
 
+  const [bills, setBills] = useState<any[]>([]);
   const [dashboardStats, setDashboardStats] = useState({
     totalFacturas: 0,
     facturasEsteMes: 0,
@@ -49,22 +50,22 @@ export function DashboardPage() {
     loadDashboard();
   }, [client.documento]);
 
-  const recentInvoices = [
-    { id: "001", cliente: "Juan Pérez", fecha: "2024-01-15", total: 25000, estado: "Pagada" },
-    { id: "002", cliente: "María García", fecha: "2024-01-14", total: 18500, estado: "Pendiente" },
-    { id: "003", cliente: "Carlos López", fecha: "2024-01-13", total: 32000, estado: "Pagada" },
-    { id: "004", cliente: "Ana Martínez", fecha: "2024-01-12", total: 12000, estado: "Vencida" },
-    { id: "005", cliente: "Luis Rodríguez", fecha: "2024-01-11", total: 28000, estado: "Pagada" },
-  ];
+  // fetch de las facturas 
+  useEffect(() => {
+  if (client?.documento) {
+    fetchBills(client.documento).then(setBills);
+  }
+}, [client.documento]);
+
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" }).format(amount);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Pagada": return "bg-green-100 text-green-800";
-      case "Pendiente": return "bg-yellow-100 text-yellow-800";
-      case "Vencida": return "bg-red-100 text-red-800";
+      case "success": return "bg-green-100 text-green-800";
+      case "pending": return "bg-yellow-100 text-yellow-800";
+      case "expired": return "bg-red-100 text-red-800";
       default: return "bg-gray-100 text-gray-800";
     }
   };
@@ -128,7 +129,7 @@ export function DashboardPage() {
             </div>
             <Users className="h-8 w-8 text-purple-600" />
           </div>
-          <p className="text-xs text-gray-500 mt-2">+5 nuevos este mes</p>
+          <p className="text-xs text-gray-500 mt-2">+0 nuevos este mes</p>
         </div>
       </div>
 
@@ -215,17 +216,17 @@ export function DashboardPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {recentInvoices.map((invoice) => (
-                <tr key={invoice.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{invoice.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{invoice.cliente}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{invoice.fecha}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(invoice.total)}</td>
+              {bills.map((bill) => (
+                <tr key={bill.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{bill.id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{bill.client_name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{bill.fecha}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(bill.total)}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(invoice.estado)}`}
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(bill.status)}`}
                     >
-                      {invoice.estado}
+                      {bill.status}
                     </span>
                   </td>
                 </tr>

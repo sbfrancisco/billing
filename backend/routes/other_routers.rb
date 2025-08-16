@@ -11,10 +11,10 @@ get '/data_transmitter' do
 
   response_data = if transmitter
     {
-      bills: transmitter.bills.count,
-      clients: transmitter.clients.count,
-      income: transmitter.bills.where(status: 'success').sum(:total),
-      pending: transmitter.bills.where(status: 'pending').count
+      bills: transmitter.issued_bills.count,
+      clients: transmitter.emisor_contacts.count,
+      income: transmitter.issued_bills.where(status: 'success').sum(:total),
+      pending: transmitter.issued_bills.where(status: 'pending').count
     }
   else
     { bills: 0, clients: 0, income: 0, pending: 0 }
@@ -22,4 +22,24 @@ get '/data_transmitter' do
 
   json response_data
 end
+
+get '/fetch_bills' do 
+  transmitter = params["transmitter"]
+  client = Client.find_by(documento: transmitter)
+
+  if client
+    bills = client.issued_bills.map do |bill|
+      bill.as_json.merge({
+        client_name: Client.find_by(documento: bill.receptor).nombre,
+        fecha: bill.created_at.strftime("%d/%m/%Y")
+      })
+    end
+
+    json bills: bills
+  else
+    json bills: []
+  end
+end
+
+
 end

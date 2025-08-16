@@ -29,14 +29,16 @@ export interface Service{
   esTemporal: boolean
 }
 
- export interface Bill{
+ export interface Bill {
+  id: string
   sales: Sale[]
   total: number
   status: string
   emisor: string
   receptor: string
-  id: string
- }
+  fecha: string
+  client_name: string
+}
 
 export interface InvoiceItem {
   id: string

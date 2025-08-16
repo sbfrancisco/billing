@@ -2,15 +2,9 @@ require 'bcrypt'
 
 class Client < ActiveRecord::Base
   include BCrypt
-
-  # ---------------------
-  # Seguridad / Password
-  # ---------------------
-  # Columna password_digest obligatoria
   validates :password_digest, presence: true
   validates :documento, presence: true, uniqueness: true
 
-  # Método para asignar contraseña usando BCrypt
   def password=(new_password)
     self.password_digest = Password.create(new_password)
   end
@@ -20,9 +14,6 @@ class Client < ActiveRecord::Base
     Password.new(password_digest) == password
   end
 
-  # ---------------------
-  # Facturas
-  # ---------------------
   # Facturas donde este cliente es receptor
   has_many :received_bills,
            class_name: 'Bill',
@@ -35,16 +26,10 @@ class Client < ActiveRecord::Base
            foreign_key: :emisor,
            primary_key: :documento
 
-  # ---------------------
-  # Servicios (si aplica)
-  # ---------------------
   has_many :services,
            foreign_key: :transmitter,
            primary_key: :documento
 
-  # ---------------------
-  # Contactos
-  # ---------------------
   # Contactos donde este cliente es emisor
   has_many :emisor_contacts,
            class_name: 'Contact',
