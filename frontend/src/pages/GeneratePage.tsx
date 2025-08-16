@@ -5,13 +5,21 @@ import { InvoiceView } from "../components/InvoiceView"
 import { ClientSection } from "./sections/ClientSection"
 import { ServicesSection } from "./sections/ServicesSection"
 import { getUserFromLocalStorage } from "../utils/userStorage"
-import { fetchClientes, fetchLastVoucherNumber } from "../utils/api"
-import type { Cliente } from "../utils/types"
-
+import { fetchClientes, fetchLastVoucherNumber, saveBill } from "../utils/api"
+import type { Cliente, Bill } from "../utils/types"
 
 export function GeneratePage() {
   const cliente = getUserFromLocalStorage()
   const [clientes, setClientes] = useState<Cliente[]>([])
+  const [billData, setBillData] = useState<Bill>({
+    sales: [],
+    total: 0,
+    status: "pendiente",
+    emisor: "",
+    receptor: "",
+    id: "",
+  })
+
   const [invoiceData, setInvoiceData] = useState({
     emisorNombre: cliente.name,
     emisorTelefono: cliente.telefono,
@@ -28,7 +36,7 @@ export function GeneratePage() {
     numeroComprobante: 0,
     items: [
       {
-        id: "1",
+        id: "null",
         codigo: "001",
         descripcion: "Producto o servicio ejemplo",
         cantidad: 1,
@@ -50,20 +58,28 @@ export function GeneratePage() {
   })
 
   useEffect(() => {
-    const loadVoucherNumber = async () => {
-      try {
-        const numero = await fetchLastVoucherNumber()
-        setInvoiceData((prev) => ({
-          ...prev,
-          numeroComprobante: numero,
-        }))
-      } catch (error) {
-        console.error("Error cargando número de comprobante:", error)
-      }
-    }
+  const loadVoucherNumber = async () => {
+    try {
+      const numero = await fetchLastVoucherNumber()
+      console.log("Último número de comprobante:", numero)
 
-    loadVoucherNumber()
-  }, [])
+      setInvoiceData((prev) => ({
+        ...prev,
+        numeroComprobante: typeof numero === "number" ? numero : 0,
+      }))
+    } catch (error) {
+      console.error("Error cargando número de comprobante:", error)
+      // fallback seguro
+      setInvoiceData((prev) => ({
+        ...prev,
+        numeroComprobante: 0,
+      }))
+    }
+  }
+
+  loadVoucherNumber()
+}, [])
+
   const [showForm, setShowForm] = useState(true)
   const [invoiceGenerated, setInvoiceGenerated] = useState(false)
   const client = getUserFromLocalStorage()
@@ -74,7 +90,6 @@ export function GeneratePage() {
         const data = await fetchClientes()
         setClientes(data)
         if (data.length > 0 && data[0].id === "1") {
-          console.log("[v0] Usando datos de prueba - inicia tu servidor backend en localhost:8000 para datos reales")
         }
       } catch (err) {
         console.error("Error al cargar clientes:", err)
@@ -87,7 +102,7 @@ export function GeneratePage() {
 
   const addItem = (tipo: "producto" | "servicio" = "producto") => {
     const newItem = {
-      id: Date.now().toString(),
+      id: "null",
       codigo: "",
       descripcion: "",
       cantidad: 1,
@@ -134,6 +149,32 @@ export function GeneratePage() {
     setTimeout(calculateTotals, 0)
   }
 
+  const handleSaveBill = async () => {
+    try {
+      const newBill: Bill = {
+        sales: invoiceData.items.map((item) => ({
+          id: item.id,
+          nombre: item.descripcion,
+          servicio: item.esServicio,
+          quantity: item.cantidad,
+          price: item.precioUnitario,
+        })),
+        total: invoiceData.total,
+        status: "pending",
+        emisor: client.documento,
+        receptor: invoiceData.clienteDocumento,
+        id: "",
+      }
+      console.log("Nueva factura:", newBill)
+
+      await saveBill(newBill)
+      setBillData(newBill)
+    } catch (error) {
+      console.error("Error al guardar la factura:", error)
+      alert("Error al guardar la factura")
+    }
+  }
+
   const calculateTotals = () => {
     setInvoiceData((prev) => {
       const subtotal = prev.items.reduce((sum, item) => sum + item.subtotal, 0)
@@ -148,10 +189,18 @@ export function GeneratePage() {
         invoiceData={invoiceData}
         invoiceGenerated={invoiceGenerated}
         onEdit={() => setShowForm(true)}
-        onSave={() => {
-          console.log("Guardando factura en base de datos:", invoiceData)
-          alert("Factura guardada en la base de datos correctamente")
-          setInvoiceGenerated(false)
+        onSave={async () => {
+          try {
+            if (!billData.emisor || !billData.receptor) {
+              await handleSaveBill()
+            } else {
+              await saveBill(billData)
+            }
+            setInvoiceGenerated(false)
+          } catch (error) {
+            alert("Error al guardar la factura")
+            console.error(error)
+          }
         }}
       />
     )
@@ -189,10 +238,7 @@ export function GeneratePage() {
                 {invoiceGenerated && (
                   <button
                     className="px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
-                    onClick={() => {
-                      console.log("Guardando factura:", invoiceData)
-                      alert("Factura guardada correctamente")
-                    }}
+                    onClick={handleSaveBill}
                   >
                     <Save className="w-4 h-4" />
                     Guardar Factura

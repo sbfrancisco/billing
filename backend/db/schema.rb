@@ -56,7 +56,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_15_042808) do
     t.index ["transmitter"], name: "index_services_on_transmitter"
   end
 
-  add_foreign_key "bills", "clients", column: "id"
+  add_foreign_key "bills", "clients", column: "emisor", primary_key: "documento"
+  add_foreign_key "bills", "clients", column: "receptor", primary_key: "documento"
   add_foreign_key "contacts", "clients", column: "emisor", primary_key: "documento"
   add_foreign_key "contacts", "clients", column: "receptor", primary_key: "documento"
   add_foreign_key "sales", "bills"

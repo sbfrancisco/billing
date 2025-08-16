@@ -1,4 +1,4 @@
-import type { Cliente, Service } from "./types"
+import type { Cliente, Service, Bill } from "./types"
 import { getUserFromLocalStorage } from "./userStorage"
 
 export async function fetchClientes(): Promise<Cliente[]> {
@@ -57,6 +57,27 @@ export async function fetchLastVoucherNumber(): Promise<number> {
     console.error("Error al cargar el último número de comprobante:", error);
     throw error;
   }
+}
+
+export async function saveBill(bill: Bill): Promise<Bill>{
+  try {
+    const response = await fetch("http://localhost:8000/save_bill", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bill),
+    })
+
+    if (!response.ok) {
+      throw new Error("Error al guardar la factura")
+    }
+
+    const data = await response.json()
+    return data.bill as Bill
+  } catch (error) {
+    console.error("Error en saveBill:", error)
+    throw error
+  }
+
 }
 
 export async function fetchServices(): Promise<Service[]> {

@@ -15,6 +15,12 @@ export interface NuevoClienteData {
   documento: string
 }
 
+export interface Sale{
+  id: string
+  quantity: number
+  price: number
+}
+
 export interface Service{
   id: string
   descripcion: string
@@ -22,6 +28,15 @@ export interface Service{
   esServicio: boolean
   esTemporal: boolean
 }
+
+ export interface Bill{
+  sales: Sale[]
+  total: number
+  status: string
+  emisor: string
+  receptor: string
+  id: string
+ }
 
 export interface InvoiceItem {
   id: string

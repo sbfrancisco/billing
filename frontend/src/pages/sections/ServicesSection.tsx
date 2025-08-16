@@ -40,7 +40,7 @@ export function ServicesSection({
 
   const addServiceFromAPI = (service: Service) => {
   const newItem = {
-    id: Date.now().toString(),
+    id: service.id,
     codigo: service.id,
     descripcion: service.descripcion,
     cantidad: 1,
