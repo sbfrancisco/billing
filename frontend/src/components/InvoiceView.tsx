@@ -8,21 +8,23 @@ interface InvoiceViewProps {
   invoiceGenerated: boolean
   onEdit: () => void
   onSave: () => void
+  only_read: boolean
 }
 
-export function InvoiceView({ invoiceData, invoiceGenerated, onEdit, onSave }: InvoiceViewProps) {
+export function InvoiceView({ invoiceData, invoiceGenerated, onEdit, onSave, only_read }: InvoiceViewProps) {
   const [copyType, setCopyType] = useState("ORIGINAL")
 
   const handlePrint = () => {
     window.print()
   }
 
+  
   return (
     <div className="space-y-6">
       {/* Controles de impresión */}
       <div className="print:hidden bg-white border-b p-4 sticky top-0 z-40 shadow-sm">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <div className="flex gap-2">
+          {!only_read && (<div className="flex gap-2">
             <select
               value={copyType}
               onChange={(e) => setCopyType(e.target.value)}
@@ -32,7 +34,7 @@ export function InvoiceView({ invoiceData, invoiceGenerated, onEdit, onSave }: I
               <option value="DUPLICADO">DUPLICADO</option>
               <option value="TRIPLICADO">TRIPLICADO</option>
             </select>
-          </div>
+          </div>)}
 
           <div className="flex gap-2">
             {invoiceGenerated && (
@@ -43,12 +45,12 @@ export function InvoiceView({ invoiceData, invoiceGenerated, onEdit, onSave }: I
                 Guardar Factura
               </button>
             )}
-            <button
+            {!only_read && (<button
               onClick={onEdit}
               className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
             >
               Editar
-            </button>
+            </button>)}
             <button
               onClick={handlePrint}
               className="flex items-center px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
